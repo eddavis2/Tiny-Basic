@@ -26,4 +26,4 @@ Tested in DosBox, running GWBASIC version 3.23.
 
 This was tested via [DoxBox](https://www.dosbox.com), running GW-Basic version 3.23.
 
-![Tiny Basic](https://githum.com/eddavis2/TinyBasic/images/Tiny basic interpreter running star trek.png)
+![Tiny Basic](https://githum.com/eddavis2/TinyBasic/images/TinyBasicRunningStarTrek.png)
