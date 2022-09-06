@@ -27,3 +27,8 @@ Tested in DosBox, running GWBASIC version 3.23.
 This was tested via [DoxBox](https://www.dosbox.com), running GW-Basic version 3.23.
 
 ![Tiny Basic](images/TinyBasicRunningStarTrek.png)
+
+If you just enter a statement without a line number, it is run interactively:
+
+![image](images/TinyBasicRunningStarTrek.png)
+
