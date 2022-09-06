@@ -30,5 +30,5 @@ This was tested via [DoxBox](https://www.dosbox.com), running GW-Basic version 3
 
 If you just enter a statement without a line number, it is run interactively:
 
-![image](images/TinyBasicRunningStarTrek.png)
+![image](images/1liner.png)
 
