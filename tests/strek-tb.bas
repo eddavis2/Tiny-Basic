@@ -4,8 +4,8 @@
   15 k = 0: b = 0: d = 30: for i = 0 to 63: j = abs(rnd(99) < 5): b = b + j
   20 m = rnd(y): m = abs((m < 209) + (m < 99) + (m < 49) + (m < 24) + (m < 9) + (m < 2)): k = k + m
   25 @(i) = -100 * m - 10 * j - rnd(8): next i: if (b < 2) + (k < 4) goto 15
-  30 print "to destroy ",#1,k," Klingons in 30 stardates."
-  35 print "there are ",#1,b," starbases.": gosub 160: c = 0: h = k
+  30 print "to destroy "; k; " Klingons in 30 stardates."
+  35 print "there are "; b; " starbases.": gosub 160: c = 0: h = k
   40 u = rnd(8): v = rnd(8): x = rnd(8): y = rnd(8)
   45 for i = 71 to 152: @(i) = 0: next i: @(8 * x + y + 62) = 4: m = abs(@(8 * u + v - 9)): n = m / 100
   50 i = 1: if n then for j = 1 to n: gosub 165: @(j + 134) = 300: @(j + 140) = s: @(j + 146) = t: next j
@@ -14,8 +14,8 @@
   65 gosub 145: gosub 325: if k goto 95
   70 print : print "Mission accomplished.": if d < 3 then print "Boy, you barely made it."
   75 if d > 5 then print "Good work...": if d > 9 then print "Fantastic!": if d > 13 then print "Unbelievable!"
-  80 d = 30 - d: i = h * 100 / d * 10: print #1,h," Klingons in ",d," stardates. (",i,")"
-  85 j = 100 * abs(c = 0) - 5 * c: print #1,c," casualties incurred. (",j,")"
+  80 d = 30 - d: i = h * 100 / d * 10: print h; " Klingons in "; d; " stardates. ("; i; ")"
+  85 j = 100 * abs(c = 0) - 5 * c: print c; " casualties incurred. ("; j; ")"
   90 print "your score:",i + j: goto 110
   95 if d < 0 then print "It's too late, the Federation has been conquered.": goto 110
  100 if e >= 0 goto 120
@@ -44,22 +44,22 @@
  180 gosub 175: j = 2: gosub 375: if i goto 120
  185 print " of galaxy map": for i = 0 to 7: print : print #1,i + 1,":",: for j = 0 to 7: m = @(8 * i + j)
  190 print #4,abs(m > 0) * m,: next j: print : next i: print "  ",: for i = 0 to 7: print "  ..",: next i: print
- 195 print "  ",: for i = 1 to 8: print #4,i,: next i: print : print : goto 120
+ 195 print " ";: for i = 1 to 8: print "   "; i;: next i: print : print : goto 120
  200 gosub 175: j = 3: gosub 375: if i goto 120
  205 print : for i = u - 1 to u + 1: for j = v - 1 to v + 1: m = 8 * i + j - 9: a = 0
  210 if (i > 0) * (i < 9) * (j > 0) * (j < 9) then a = abs(@(m)): @(m) = a
  215 print #4,a,: next j: print : next i: goto 120
  220 gosub 175: j = 1: gosub 375: if i goto 120
  225 m = 8 * u + v - 9: @(m) = abs(@(m))
- 230 print : for i = 1 to 8: print #1,i,: for j = 1 to 8: m = @(8 * i + j + 62): if m = 0 then print " .",
+ 230 print : for i = 1 to 8: print i;: for j = 1 to 8: m = @(8 * i + j + 62): if m = 0 then print " .",
  235 if m = 1 then print " K",
  240 if m = 2 then print " B",
  245 if m = 3 then print " *",
  250 if m = 4 then print " E",
- 255 next j: print : next i: print "  ",: for i = 1 to 8: print #2,i,: next i: print : goto 120
+ 255 next j: print : next i: print " ",: for i = 1 to 8: print #2,i,: next i: print : goto 120
  260 j = 4: gosub 375: if i goto 120
  265 input " energized. units to fire:", a: if a < 1 goto 120
- 270 if a > e then print "Spock: 'we have only ",#1,e," units.'": goto 120
+ 270 if a > e then print "Spock: 'we have only "; e; " units.'": goto 120
  275 e = e - a: if n < 1 then print "phaser fired at empty space.": goto 65
  280 a = a / n: for m = 135 to 140: if @(m) = 0 goto 290
  285 gosub 295: print #3,s," units hit ",: gosub 305
@@ -76,10 +76,10 @@
  340 a = (@(m) + rnd(@(m))) / 2: gosub 295: t = t + s: i = @(m + 6): j = @(m + 12)
  345 print #3,s," units hit from Klingon at s-",#1,i,j
  350 next m: e = e - t: if e <= 0 then print "*** bang ***": return
- 355 print #1,e," units of energy left.": if rnd(e / 4) > t return
+ 355 print e; " units of energy left.": if rnd(e / 4) > t return
  360 if @(70) = 0 then @(70) = rnd(t / 50 + 1): j = 7: goto 375
  365 j = rnd(6): @(j + 63) = rnd(t / 99 + 1)+@(j + 63): i = rnd(8) + 1: c = c + i
- 370 print "Mc coy: 'sickbay to bridge, we suffered",#2,i," casualties."
+ 370 print "Mc coy: 'sickbay to bridge, we suffered"; i; " casualties."
  375 i = @(j + 63): if j = 1 then print "short range sensor",
  380 if j = 2 then print "Computer display",
  385 if j = 3 then print "Long range sensor",
@@ -88,7 +88,7 @@
  400 if j = 6 then print "Photon torpedo tubes",
  405 if j = 7 then print "Shield",
  410 if i = 0 then return
- 415 print " damaged, ",#1,i," stardates estimated for repair": return
+ 415 print " damaged, "; i; " stardates estimated for repair": return
  420 print "status report:": print "stardate",#10,3230 - d: print "time left",#7,d
  425 print "condition     ",: if o then print "docked": goto 445
  430 if n then print "red": goto 445
