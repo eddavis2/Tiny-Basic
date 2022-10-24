@@ -1,4 +1,4 @@
-'Tiny Basic interpreter.  Just enough functionality to play Star Trek.
+'Tiny Basic interpreter in NaaLaa.  Just enough functionality to play Star Trek.
 
 constant c_maxlines = 10000, c_maxvars = 26
 
@@ -108,21 +108,21 @@ function docmd()
 endfunc
 
 function help()
-   wln("ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Tiny Basic (N7) ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿")
-   wln("³ bye, clear, cls, end/stop, help, list, load/save, new, run, tron/off³Û")
-   wln("³ for <var> = <expr1> to <expr2> ... next <var>                       ³Û")
-   wln("³ gosub <expr> ... return                                             ³Û")
-   wln("³ goto <expr>                                                         ³Û")
-   wln("³ if <expr> then <statement>                                          ³Û")
-   wln("³ input [prompt,] <var>                                               ³Û")
-   wln("³ <var>=<expr>                                                        ³Û")
-   wln("³ print <expr|string>[,<expr|string>][;]                              ³Û")
-   wln("³ rem <anystring>  or ' <anystring>                                   ³Û")
-   wln("³ Operators; ^, * / \ mod + - < <= > >= = <>, not, and, or            ³Û")
-   wln("³ Integer variables a..z, and array @(expr)                           ³Û")
-   wln("³ Functions: abs(expr), asc(ch), rnd(expr), sgn(expr)                 ³Û")
-   wln("ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÛ")
-   wln("  ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß")
+   wln("ÃšÃ„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„ Tiny Basic (N7) Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Â¿")
+   wln("Â³ bye, clear, cls, end/stop, help, list, load/save, new, run, tron/offÂ³Ã›")
+   wln("Â³ for <var> = <expr1> to <expr2> ... next <var>                       Â³Ã›")
+   wln("Â³ gosub <expr> ... return                                             Â³Ã›")
+   wln("Â³ goto <expr>                                                         Â³Ã›")
+   wln("Â³ if <expr> then <statement>                                          Â³Ã›")
+   wln("Â³ input [prompt,] <var>                                               Â³Ã›")
+   wln("Â³ <var>=<expr>                                                        Â³Ã›")
+   wln("Â³ print <expr|string>[,<expr|string>][;]                              Â³Ã›")
+   wln("Â³ rem <anystring>  or ' <anystring>                                   Â³Ã›")
+   wln("Â³ Operators; ^, * / \ mod + - < <= > >= = <>, not, and, or            Â³Ã›")
+   wln("Â³ Integer variables a..z, and array @(expr)                           Â³Ã›")
+   wln("Â³ Functions: abs(expr), asc(ch), rnd(expr), sgn(expr)                 Â³Ã›")
+   wln("Ã€Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã„Ã™Ã›")
+   wln("  ÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸÃŸ")
 endfunc
 
 function assign()
