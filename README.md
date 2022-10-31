@@ -1,7 +1,7 @@
 # TinyBasic
-Interpreters for Tiny Basic.
+Interpreters for Tiny Basic written in GWBasic, C, C#, VB.Net, Python, Pascal, and others. Pure interpreters, e.g., not byte code, not even pre-tokenized.
 
-gw.bas is an interpreter for Tiny Basic written in GWBasic.
+For instance, gw.bas is an interpreter for Tiny Basic written in GWBasic.
 
 It supports:
 - bye/quit, clear, cls, end/stop, help, list, load, new, run, tron, troff
@@ -22,7 +22,7 @@ It supports:
 Has enough features that it can run a Tiny Basic version of Star Trek.
 Tested in DosBox, running GWBASIC version 3.23.
 
-[tests/strek-tb.bas is a version of the Star Trek game, that gw can run.](tests/strek-tb.bas)
+[samples/strek-tb.bas is a version of the Star Trek game, that gw can run.](tests/strek-tb.bas)
 
 This was tested via [DoxBox](https://www.dosbox.com), running GW-Basic version 3.23.
 
