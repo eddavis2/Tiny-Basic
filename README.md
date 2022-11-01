@@ -1,7 +1,8 @@
 # TinyBasic
-Interpreters for Tiny Basic written in GWBasic, C, C#, VB.Net, Python, Pascal, and others. Pure interpreters, e.g., not byte code, not even pre-tokenized.
+Interpreters for Tiny Basic written in GWBasic, C, C#, VB.Net, Python, Pascal, and others. 
+These are Pure interpreters, e.g., no byte code, no AST, not even pre-tokenized - although the lexical analyzer is separate from the parser.
 
-For instance, gw.bas is an interpreter for Tiny Basic written in GWBasic.
+For instance, [gw.bas](GW-Basic/gw.bas) is an interpreter for Tiny Basic written in GWBasic.
 
 It supports:
 - bye/quit, clear, cls, end/stop, help, list, load, new, run, tron, troff
@@ -16,15 +17,15 @@ It supports:
 - Operators: + - * / < <= > >= <> =
 - Integer variables a..z, and single integer array: @(expr)
 - Functions: abs(expr), asc(ch), rnd(expr), sgn(expr)
-- ":" to have multiple statements per line.
+- ":" to allow multiple statements per line.
 - Line numbers are required for programs, but has an interactive mode too.
 
-Has enough features that it can run a Tiny Basic version of Star Trek.
-Tested in DosBox, running GWBASIC version 3.23.
+Has enough features that it can run a Tiny Basic version of Star Trek, and a Tiny Basic version of MineSweeper.
 
-[samples/strek-tb.bas is a version of the Star Trek game, that gw can run.](samples/strek-tb.bas)
+The GW-Basic version was tested in [DoxBox](https://www.dosbox.com) running GWBASIC version 3.23, and with [PC-Basic](https://robhagemans.github.io/pcbasic/) .
 
-This was tested via [DoxBox](https://www.dosbox.com), running GW-Basic version 3.23.
+- [Star Trek](samples/strek-tb.bas) is a version of the Star Trek game, that most interpreters can run.
+- [MineSweeper](samples/minesweeper.bas) is a version of the Mine Sweeper game, that most interpreters can run.
 
 ![Tiny Basic](images/TinyBasicRunningStarTrek.png)
 
