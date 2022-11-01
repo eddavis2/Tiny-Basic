@@ -1,5 +1,5 @@
 # TinyBasic
-Interpreters for Tiny Basic written in GWBasic, C, C#, VB.Net, Python, Pascal, and others. 
+Interpreters for Tiny Basic written in GW-Basic, C, C#, VB.Net, Python, Pascal, and others. 
 These are Pure interpreters, e.g., no byte code, no AST, not even pre-tokenized - although the lexical analyzer is separate from the parser.
 
 For instance, [gw.bas](GW-Basic/gw.bas) is an interpreter for Tiny Basic written in GWBasic.
