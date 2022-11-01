@@ -22,7 +22,7 @@ It supports:
 Has enough features that it can run a Tiny Basic version of Star Trek.
 Tested in DosBox, running GWBASIC version 3.23.
 
-[samples/strek-tb.bas is a version of the Star Trek game, that gw can run.](tests/strek-tb.bas)
+[samples/strek-tb.bas is a version of the Star Trek game, that gw can run.](samples/strek-tb.bas)
 
 This was tested via [DoxBox](https://www.dosbox.com), running GW-Basic version 3.23.
 
