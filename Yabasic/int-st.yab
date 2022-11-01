@@ -1,0 +1,407 @@
+'Ed Davis - Tiny Basic in Yabasic.
+
+c_maxlines = 7000: c_maxvars = 26: c_at_max = 500: c_g_stack = 100
+dim pgm$(c_maxlines)
+dim vars(c_maxvars)
+dim gstackln(c_g_stack) // gosub line stack
+dim gstacktp(c_g_stack) // gosub textp stack
+dim atarry(c_at_max)    // the @ array
+
+gsp = 0
+if peek("arguments") > 0 then
+  toktype$ = "string"
+  tok$ = chr$(34) + peek$("argument")
+  loadstmt()
+  tok$ = "run"
+  docmd()
+else
+  help()
+end if
+do
+  errors = false
+  line input "yb> " pgm$(0)
+  if pgm$(0) <> "" then
+    initlex(0)
+    if toktype$ = "number" then
+      validlinenum()
+      pgm$(num) = mid$(pgm$(0), textp, len(pgm$(0)) - textp + 1)
+    else
+      docmd()
+    endif
+  endif
+loop
+
+sub docmd()
+  local running
+  do
+    switch tok$
+      case "bye": case "quit" : nexttok():         exit
+      case "end": case "stop" : nexttok():         return
+      case "clear"       : nexttok(): clearvars(): return
+      case "help"        : nexttok(): help():      return
+      case "list"        : nexttok(): liststmt():  return
+      case "load"        : nexttok(): loadstmt():  return
+      case "new"         : nexttok(): newstmt():   return
+      case "run"         : nexttok(): runstmt(): running = true: break
+      case "save"        : nexttok(): savestmt():  return
+      case "gosub"       : nexttok(): gosubstmt():    break
+      case "goto"        : nexttok(): gotostmt():     break
+      case "if"          : nexttok(): ifstmt():       break
+      case "input"       : nexttok(): inputstmt():    break
+      case "print": case "?": nexttok(): printstmt(): break
+      case "return"      : nexttok(): returnstmt():   break
+      case "@"           : nexttok(): arrassn():      break
+      case ":"           : nexttok(): break  // just continue
+      case ""            : break             // handled below
+      default:
+        if toktype$ = "ident" then
+          assign()
+        else
+          print "Unknown token ", tok$, " at line ", curline: errors = true
+        end if
+    end switch
+
+    if errors return
+    if curline > c_maxlines showtime(running): return
+    while (tok$ = "")
+      if curline = 0 or curline >= c_maxlines showtime(running): return
+      initlex(curline + 1)
+    wend
+  loop
+end sub
+
+sub showtime(running)
+  local endtime
+
+  endtime = val(mid$(time$,10))
+  if running print "Took : ", endtime - starttime, " seconds"
+end sub
+
+sub help()
+   print "+---------------------- Tiny Basic Help (Yabasic)----------------------+"
+   print "| bye, clear, end, help, list, load, new, run, save, stop              |"
+   print "| goto <expr>                                                          |"
+   print "| gosub <expr> ... return                                              |"
+   print "| if <expr> then <statement>                                           |"
+   print "| input [prompt,] <var>                                                |"
+   print "| <var>=<expr>                                                         |"
+   print "| print <expr|string>[,<expr|string>][;]                               |"
+   print "| rem <anystring>                                                      |"
+   print "| Operators: + - * / < <= > >= <> =                                    |"
+   print "| Integer variables a..z, and array @(expr)                            |"
+   print "| Functions: rnd(expr)                                                 |"
+   print "+----------------------------------------------------------------------+"
+end sub
+
+sub gosubstmt()   // for gosub: save the line and column
+  gsp = gsp + 1
+  gstackln(gsp) = curline
+  gstacktp(gsp) = textp
+
+  gotostmt()
+end sub
+
+sub assign()
+  local var
+
+  var = getvarindex(): nexttok()
+  expect("=")
+  vars(var) = expression(0)
+end sub
+
+sub arrassn()  // array assignment: @(expr) = expr
+  local n, atndx
+
+  atndx = parenexpr()
+  if tok$ <> "=" then
+    print "Array Assign: Expecting '=', found:", tok$: errors = true
+  else
+    nexttok()     // skip the "="
+    n = expression(0)
+    atarry(atndx) = n
+  end if
+end sub
+
+sub ifstmt()
+  if expression(0) = 0 skiptoeol(): return
+  if tok$ = "then" nexttok()
+  if toktype$ = "number" gotostmt()
+end sub
+
+sub inputstmt()   // "input" [string ","] var
+  local var, st$
+
+  if toktype$ = "string" then
+    print mid$(tok$, 2);
+    nexttok()
+    expect(",")
+  else
+    print "? ";
+  end if
+  var = getvarindex(): nexttok()
+  line input st$
+  if left$(st$, 1) >= "0" and left$(st$, 1) <= "9" then
+    vars(var) = val(st$)
+  else
+    vars(var) = asc(st$)
+  end if
+end sub
+
+sub liststmt()
+  local i
+
+  for i = 1 to c_maxlines
+    if pgm$(i) <> "" print i, " ", pgm$(i)
+  next i
+  print
+end sub
+
+// load statement
+sub loadstmt()
+  local n, filename$
+
+  newstmt()
+  filename$ = getfilename$("Load"): if filename$ = "" return
+  open filename$ for reading as #1
+  n = 0
+  while (not eof(1))
+    line input #1 pgm$(0)
+    initlex(0)
+    if toktype$ = "number" and num > 0 and num <= c_maxlines then
+      pgm$(num) = mid$(pgm$(0), textp, len(pgm$(0)) - textp + 1)
+      n = num
+    else
+      n = n + 1
+      pgm$(n) = pgm$(0)
+    end if
+  wend
+  close #1
+  curline = 0
+end sub
+
+sub newstmt()
+  local i
+
+  clearvars()
+  for i = 1 to c_maxlines
+    pgm$(i) = ""
+  next i
+end sub
+
+// "print" [[#num "," ] expr { "," [#num ","] expr }] [","] {":" stmt} eol
+// expr can also be a literal string
+sub printstmt()
+  local printnl
+
+  printnl = true
+  while (tok$ <> ":" and tok$ <> "" and tok$ <> "else")
+    printnl = true
+
+    if toktype$ = "string" then
+      print mid$(tok$, 2);
+      nexttok()
+    else
+      print ltrim$(str$(expression(0)));
+    end if
+
+    if tok$ = "," then
+      nexttok()
+      print " ";
+      printnl = false
+    elseif tok$ = ";" then
+      nexttok()
+      printnl = false
+    else
+      break
+    end if
+  wend
+
+  if printnl print
+end sub
+
+sub returnstmt()    // return from a subroutine
+  curline = gstackln(gsp)
+  textp   = gstacktp(gsp)
+  gsp = gsp - 1
+  initlex2()
+end sub
+
+sub runstmt()
+  starttime = val(mid$(time$,10))
+  clearvars()
+  initlex(1)
+end sub
+
+sub gotostmt()
+  num = expression(0)
+  validlinenum()
+  initlex(num)
+end sub
+
+sub savestmt()
+  local i, filename$
+
+  newstmt()
+  filename$ = getfilename$("Save"): if filename$ = "" return
+  open filename$ for writing as #1
+  for i = 1 to c_maxlines
+    if pgm$(i) <> "" print #1, i, pgm$(i)
+  next i
+  close #1
+end sub
+
+sub getfilename$(action$)
+  local filename$
+  if toktype$ = "string" then
+    filename$ = mid$(tok$, 2)
+  else
+    print action$;
+    line input filename$
+  end if
+  if filename$ = "" return ""
+  if instr(filename$, ".") = 0 filename$ = filename$ + ".bas"
+  return filename$
+end sub
+
+sub validlinenum()
+  if num <= 0 or num > c_maxlines print "Line number out of range": errors = true
+end sub
+
+sub clearvars()
+  local i
+
+  for i = 1 to c_maxvars
+    vars(i) = 0
+  next i
+  gsp = 0
+end sub
+
+sub parenexpr()
+  expect("("): if errors return
+  parenexpr = expression(0)
+  expect(")")
+end sub
+
+sub expression(minprec)
+  local n
+
+  // handle numeric operands - numbers and unary operators
+  if 0 then // to allow elseif
+  elseif tok$ = "-"   then nexttok(): n = -expression(4)
+  elseif tok$ = "+"   then nexttok(): n =  expression(4)
+  elseif tok$ = "(" then n = parenexpr()
+  elseif tok$ = "rnd" then nexttok(): n = int(ran() * parenexpr())
+  elseif tok$ = "@"    then nexttok(): n = atarry(parenexpr())
+  elseif toktype$ = "number" then n = num: nexttok()
+  elseif toktype$ = "ident"  then n = vars(getvarindex()): nexttok()
+  else print "syntax error: expecting an operand, found: ", tok$: errors = true: return
+  end if
+
+  do  // while binary operator and precedence of tok$ >= minprec
+    if 0 then // to allow elseif
+    elseif minprec <= 1 and tok$ = "="  then nexttok(): n = abs(n =  expression(2))
+    elseif minprec <= 1 and tok$ = "<"  then nexttok(): n = abs(n <  expression(2))
+    elseif minprec <= 1 and tok$ = ">"  then nexttok(): n = abs(n >  expression(2))
+    elseif minprec <= 1 and tok$ = "<>" then nexttok(): n = abs(n <> expression(2))
+    elseif minprec <= 1 and tok$ = "<=" then nexttok(): n = abs(n <= expression(2))
+    elseif minprec <= 1 and tok$ = ">=" then nexttok(): n = abs(n >= expression(2))
+    elseif minprec <= 2 and tok$ = "+"  then nexttok(): n = n +  expression(3)
+    elseif minprec <= 2 and tok$ = "-"  then nexttok(): n = n -  expression(3)
+    elseif minprec <= 3 and tok$ = "*"  then nexttok(): n = n *  expression(4)
+    elseif minprec <= 3 and tok$ = "/"  then nexttok(): n = int(n /  expression(4))
+    else break
+    end if
+  loop
+
+  return n
+end sub
+
+sub getvarindex()
+  if toktype$ <> "ident" print "Not a variable:", tok$: errors = true: return
+  return asc(left$(tok$, 1)) - asc("a")
+end sub
+
+sub expect(s$)
+  if tok$ = s$ nexttok(): return
+  print "(", curline, ") expecting ", s$, " but found ", tok$, " =>", pgm$(curline): errors = true
+end sub
+
+sub initlex(n)
+  curline = n
+  textp = 1
+  initlex2()
+end sub
+
+sub initlex2()
+  thelin$ = pgm$(curline)
+  thech$ = " "
+  nexttok()
+end sub
+
+sub skiptoeol()
+  tok$ = "": toktype$ = ""
+  textp = len(thelin$) + 1
+end sub
+
+sub nexttok()
+  tok$ = "": toktype$ = ""
+  while (thech$ <= " ")
+    if thech$ = "" return
+    getch()
+  wend
+
+  toktype$ = "punct"
+  tok$ = thech$ + mid$(thelin$, textp, 1)
+  if tok$ = ">=" or tok$ = "<=" or tok$ = "<>" then
+    getch(): getch(): return
+  end if
+  tok$ = thech$
+  if instr("#()*+,-/:;<=>?@", thech$) > 0 getch(): return
+  if tok$ = chr$(34) readstr(): return    // double quote
+  if (tok$ >= "a" and thech$ <= "z") or (tok$ >= "A" and thech$ <= "Z") then
+    readident()
+    if tok$ = "rem" skiptoeol()
+    return
+  end if
+  if tok$ >= "0" and thech$ <= "9" readint(): return
+  if tok$ = chr$(39) skiptoeol(): return  //single quote
+  toktype$ = ""
+  print "What?", curline, textp, thech$, thelin$: errors = true
+end sub
+
+// leave the " as the beginning of the string, so it won//t get confused with other tokens
+// especially in the print routines
+sub readstr()
+  toktype$ = "string"
+  getch()
+  while (thech$ <> chr$(34))  // while not a double quote
+    if thech$ = "" print "String not terminated": errors = true: return
+    tok$ = tok$ + thech$
+    getch()
+  wend
+  getch()
+end sub
+
+sub readint()
+  tok$ = "": toktype$ = "number"
+  while (thech$ >= "0" and thech$ <= "9")
+    tok$ = tok$ + thech$
+    getch()
+  wend
+  num = val(tok$)
+end sub
+
+sub readident()
+  tok$ = "": toktype$ = "ident"
+  while ((thech$ >= "a" and thech$ <= "z") or (thech$ >= "A" and thech$ <= "Z"))
+    tok$ = tok$ + lower$(thech$)
+    getch()
+  wend
+end sub
+
+sub getch()
+  // Any more text on this line?
+  if textp > len(thelin$) thech$ = "": return
+  thech$ = mid$(thelin$, textp, 1)
+  textp = textp + 1
+end sub
