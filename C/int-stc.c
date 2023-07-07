@@ -391,7 +391,7 @@ void savestmt(void) {
 
     for (i = 1; i < c_maxlines; ++i) {
         if (pgm[i])
-            printf("%d %s\n", i, pgm[i]);
+            fprintf(fp, "%d %s\n", i, pgm[i]);
     }
     fclose(fp);
 save_free:
