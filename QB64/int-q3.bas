@@ -103,21 +103,21 @@ sub docmd
 end sub
 
 sub help
-   print "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Tiny Basic (QBASIC) --------ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿"
-   print "³ bye, clear, cls, end/stop, help, list, load/save, new, run, tron/off³Û"
-   print "³ for <var> = <expr1> to <expr2> ... next <var>                       ³Û"
-   print "³ gosub <expr> ... return                                             ³Û"
-   print "³ goto <expr>                                                         ³Û"
-   print "³ if <expr> then <statement>                                          ³Û"
-   print "³ input [prompt,] <var>                                               ³Û"
-   print "³ <var>=<expr>                                                        ³Û"
-   print "³ print <expr|string>[,<expr|string>][;]                              ³Û"
-   print "³ rem <anystring>  or ' <anystring>                                   ³Û"
-   print "³ Operators: ^, * / \ mod + - < <= > >= = <>, not, and, or            ³Û"
-   print "³ Integer variables a..z, and array @(expr)                           ³Û"
-   print "³ Functions: abs(expr), asc(ch), rnd(expr), sgn(expr)                 ³Û"
-   print "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÛ"
-   print "  ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß"
+   print "â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Tiny Basic (QBASIC) --------â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”"
+   print "â”‚ bye, clear, cls, end/stop, help, list, load/save, new, run, tron/offâ”‚â–ˆ"
+   print "â”‚ for <var> = <expr1> to <expr2> ... next <var>                       â”‚â–ˆ"
+   print "â”‚ gosub <expr> ... return                                             â”‚â–ˆ"
+   print "â”‚ goto <expr>                                                         â”‚â–ˆ"
+   print "â”‚ if <expr> then <statement>                                          â”‚â–ˆ"
+   print "â”‚ input [prompt,] <var>                                               â”‚â–ˆ"
+   print "â”‚ <var>=<expr>                                                        â”‚â–ˆ"
+   print "â”‚ print <expr|string>[,<expr|string>][;]                              â”‚â–ˆ"
+   print "â”‚ rem <anystring>  or ' <anystring>                                   â”‚â–ˆ"
+   print "â”‚ Operators: ^, * / \ mod + - < <= > >= = <>, not, and, or            â”‚â–ˆ"
+   print "â”‚ Integer variables a..z, and array @(expr)                           â”‚â–ˆ"
+   print "â”‚ Functions: abs(expr), asc(ch), rnd(expr), sgn(expr)                 â”‚â–ˆ"
+   print "â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜â–ˆ"
+   print "  â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€â–€"
 end sub
 
 sub assign
@@ -196,7 +196,7 @@ sub inputstmt   ' "input" [string ","] var
   line input st
   if st = "" then st = "0"
 
-  if left$(st, 1) >= "0" and left$(st, 1) <= "9" then
+  if (left$(st, 1) >= "0" and left$(st, 1) <= "9") or left$(st, 1) = "-" then
     vars(var) = val(st)
   else
     vars(var) = asc(st)
