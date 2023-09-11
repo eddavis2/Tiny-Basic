@@ -2,7 +2,7 @@
   Ed Davis, 2022
   Loosely based (but greatly expanded) on Zserge's 166 line toy basic -
   https://zserge.com/posts/transpilers/ - which in turn was
-  apparently loosely based (but not attributed) on the IOCC Basic interpreter entry -
+  apparently loosely based on the IOCC Basic interpreter entry -
   https://github.com/ioccc-src/winner/blob/master/1991/dds.ansi.c
   To compile: gcc.exe -Wall -Wextra -pedantic -s -Os basic.c -o basic
   Implements enough Basic to play tiny star trek.
