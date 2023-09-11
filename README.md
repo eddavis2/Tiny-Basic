@@ -2,7 +2,7 @@
 Interpreters for Tiny Basic written in GW-Basic, C, C#, Java, Pascal, Python, VB.Net and others. 
 These are Pure interpreters, e.g., no byte code, no AST, not even pre-tokenized - although the lexical analyzer is separate from the parser.
 
-For instance, [gw.bas](GW-Basic/gw.bas) is an interpreter for Tiny Basic written in GWBasic.
+For instance, [gw.bas](GW-Basic/gw.bas) is an interpreter for Tiny Basic written in GW-Basic.
 
 It supports:
 - bye/quit, clear, cls, end/stop, help, list, load, new, run, tron, troff
