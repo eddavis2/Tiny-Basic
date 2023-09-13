@@ -1,1 +1,374 @@
-
+ZXASCII
+AUTO -1
+PROG /tinybasic
+CHANGED FALSE
+1 REM Tiny Basic interpreter.  For SpecBas. Unfinished
+2 REM By Ed Davis
+3 maxlines = 1000: atmax = 500: maxvar = 26
+4 dim pgm$(maxlines) base 0
+5 dim vars(maxvar)
+6 dim atarry(atmax)
+7 dim nstack(30)
+8 dim pstack(30)
+9 dim gstackln(200)
+10 dim gstacktp(200)
+11 dim forvar(maxvar)
+12 dim forlimit(maxvar)
+13 dim forline(maxvar)
+14 dim forpos(maxvar)
+15 REM dim atndx
+16 REM dim curline
+17 REM dim forndx
+18 REM dim gsp
+19 REM dim i
+20 REM dim n
+21 REM dim nsp
+22 REM dim num
+23 REM dim printnl
+24 REM dim printwidth
+25 REM dim retval
+26 REM dim textp
+27 REM dim tracing
+28 REM dim var
+29 REM
+30 REM dim thech$
+31 REM dim filename$
+32 REM dim tmp$
+33 REM dim thelin$
+34 REM dim tok$
+35 REM dim toktype$
+36 gsp = 0
+37 GO SUB 82
+38 REM  main loop
+39 errors = false: tracing = false
+40 input "gw> ", pgm$(0)
+41 IF pgm$(0) = "" THEN GO TO 38
+42 num = 0: GO SUB 315
+43 REM  if line starts with a number, store it, otherwise run it
+44 IF toktype$ <> "number" THEN GO SUB 48: GO TO 38
+45 GO SUB 239
+46 if not errors then pgm$(num) = mid$(pgm$(0), textp, len(pgm$(0)) - textp + 1)
+47 GO TO 38
+48 REM  main command processor
+49 if errors or curline > maxlines then return
+50 IF tok$ <> "" THEN GO TO 54
+51 if curline = 0 or curline >= maxlines then return
+52 num = curline + 1: GO SUB 315
+53 GO TO 48
+54 if tracing and left$(tok$, 1) <> ":" then print curline; tok$; thech$; mid$(thelin$, textp, len(thelin$) - textp + 1)
+55 if tok$ = "bye" or tok$ = "quit" then stop
+56 if tok$ = "end" or tok$ = "stop" then     return
+57 IF tok$ = "clear"   THEN GO SUB 117: RETURn
+58 IF tok$ = "help"    THEN GO SUB 82:   RETURn
+59 IF tok$ = "list"    THEN GO SUB 163:  RETURn
+60 IF tok$ = "load" OR tok$ = "old" THEN GO SUB 327: GO SUB 169: RETURn
+61 IF tok$ = "new"     THEN GO SUB 191:   RETURn
+62 IF tok$ = "run"     THEN GO SUB 235: GO TO 48
+63 IF tok$ = "tron"    THEN GO SUB 327: tracing = true: GO TO 48
+64 IF tok$ = "troff"   THEN GO SUB 327: tracing = false: GO TO 48
+65 IF tok$ = "cls"     THEN GO SUB 327: CLS: GO TO 48
+66 IF tok$ = "for"     THEN GO SUB 327: GO SUB 126:   GO TO 48
+67 IF tok$ = "gosub"   THEN GO SUB 327: GO SUB 138: GO TO 48
+68 IF tok$ = "goto"    THEN GO SUB 327: GO SUB 142:  GO TO 48
+69 IF tok$ = "if"      THEN GO SUB 327: GO SUB 147:    GO TO 48
+70 IF tok$ = "input"   THEN GO SUB 327: GO SUB 153: GO TO 48
+71 IF tok$ = "next"    THEN GO SUB 327: GO SUB 197:  GO TO 48
+72 IF tok$ = "print" OR tok$ = "?" THEN GO SUB 327: GO SUB 208: GO TO 48
+73 IF tok$ = "return"  THEN GO SUB 327: GO SUB 229:GO TO 48
+74 IF tok$ = ":"       THEN GO SUB 327: GO TO 48
+75 IF tok$ = "let"     THEN GO SUB 327
+76 IF tok$ = "@"       THEN GO SUB 327: GO SUB 108:   GO TO 48
+77 IF toktype$ = "ident" THEN GO SUB 98:  GO TO 48
+78 IF tok$ = ""        THEN                  GO TO 48
+79 print "Unknown token '"; tok$; "' at line:"; curline; " Col:"; textp; " : "; thelin$
+80 return
+81 REM  statements
+82 REM  show the help screen
+83 print "+---------------------- Tiny Basic Help (GW-Basic)--------------------+"
+84 print "| bye, clear, cls, end, help, list, load, new, run, tron, troff, stop |"
+85 print "| for <var> = <expr1> to <expr2> ... next <var>                       |"
+86 print "| gosub <expr> ... return                                             |"
+87 print "| goto <expr>                                                         |"
+88 print "| if <expr> then <statement>                                          |"
+89 print "| input [prompt,] <var>                                               |"
+90 print "| [let] <var>=<expr>                                                  |"
+91 print "| print <expr|string>[,<expr|string>][;]                              |"
+92 print "| rem <anystring> or '<anystring>                                     |"
+93 print "| Operators: + - * / < <= > >= <> =                                   |"
+94 print "| Integer variables a..z, and array @(expr)                           |"
+95 print "| Functions: abs(expr), asc(ch), rnd(expr), sgn(expr)                 |"
+96 print "+---------------------------------------------------------------------+"
+97 return
+98 REM  assignment: ident = expression - side effect: var has variable index
+99 GO SUB 297
+100 ivar = n
+101 GO SUB 327
+102 if tok$ <> "=" then print "("; curline; ") "; "Assign: Expecting '=', found:"; tok$: errors = true: return
+103 GO SUB 327
+104 GO SUB 251
+105 vars(ivar) = retval
+106 if tracing then print "*** "; chr$(ivar + code("a")); " = "; retval
+107 return
+108 REM  array assignment: @(expr) = expr
+109 GO SUB 242
+110 atndx = retval
+111 if tok$ <> "=" then print "("; curline; ") "; "Array Assign: Expecting '=', found:"; tok$: errors = true: return
+112 GO SUB 327
+113 GO SUB 251
+114 atarry(atndx) = retval
+115 if tracing then print "*** @("; atndx; ") = "; retval
+116 return
+117 REM  clear statement
+118 for i = 1 to maxvar
+119 vars(i) = 0
+120 next i
+121 for i = 0 to atmax
+122 atarry(i) = 0
+123 next i
+124 gsp = 0
+125 return
+126 REM  for i = expr to expr
+127 GO SUB 98
+128 REM  vars(var) has the value; var has the number value of the variable in 0..25
+129 forndx = ivar
+130 forvar(forndx) = vars(ivar)
+131 IF tok$ = "to" THEN GO SUB 327 ELSE PRINT "("; curline; ") "; "For: Expecting 'to', found:"; tok$: errors = true: RETURn
+132 GO SUB 251
+133 forlimit(forndx) = retval
+134 REM  need to store iter, limit, line, and col
+135 forline(forndx) = curline
+136 if tok$ = "" then forpos(forndx) = textp else forpos(forndx) = textp - 2
+137 return
+138 REM  gosub expr
+139 GO SUB 310
+140 GO SUB 142
+141 return
+142 REM  goto expr
+143 GO SUB 251: num = retval
+144 GO SUB 239
+145 GO SUB 315
+146 return
+147 REM  if expr [then] statment
+148 GO SUB 251
+149 IF retval = 0 THEN GO SUB 323: RETURn
+150 IF tok$ = "then" THEN GO SUB 327
+151 IF toktype$ = "number" THEN GO SUB 142
+152 return
+153 REM  "input" [string ","] var
+154 IF toktype$ <> "string" THEN PRINT "? ": GO TO 159
+155 print mid$(tok$, 2, len(tok$) - 1);
+156 GO SUB 327
+157 if tok$ <> "," then print "("; curline; ") "; "Input: Expecting ',', found:"; tok$: errors = true: return
+158 GO SUB 327
+159 GO SUB 297: iVAR = n: GO SUB 327
+160 input tmp$: if tmp$ = "" then tmp$ = "0"
+161 if left$(tmp$, 1) >= "0" and left$(tmp$, 1) <= "9" then vars(ivar) = val(tmp$) else vars(ivar) = code(tmp$)
+162 return
+163 REM  list the code
+164 for i = 1 to maxlines
+165 if pgm$(i) <> "" then print i; " "; pgm$(i)
+166 next i
+167 print
+168 return
+169 REM  load statement
+170 rem GO SUB 191
+171 rem IF toktype$ <> "string" THEN GO TO 174
+172 rem filename$ = mid$(tok$, 2)
+173 rem GO TO 176
+174 rem line input "Program?", filename$
+175 rem if filename$ = "" then return
+176 rem if instr(filename$, ".") = 0 then filename$ = filename$ + ".bas"
+177 rem open filename$ for input as #1
+178 rem n = 0
+179 rem IF eof(1) THEN GO TO 186
+180 rem line input #1, pgm$(0)
+181 rem num = 0: GO SUB 315
+182 rem IF toktype$ = "number" AND num > 0 AND num <= maxlines THEN n = num: GO TO 184
+183 rem n = n + 1: textp = 1
+184 rem pgm$(n) = mid$(pgm$(0), textp)
+185 rem GO TO 179
+186 rem close #1
+187 rem filename$ = ""
+188 rem curline = 0
+189 rem tok$ = ""
+190 return
+191 REM  new statement
+192 GO SUB 117
+193 for i = 1 to maxlines
+194 pgm$(i) = ""
+195 next i
+196 return
+197 REM  next ident
+198 REM  tok$ needs to have the variable
+199 GO SUB 297
+200 forndx = n
+201 forvar(forndx) = forvar(forndx) + 1
+202 vars(forndx) = forvar(forndx)
+203 IF forvar(forndx) > forlimit(forndx) THEN GO SUB 327: RETURn
+204 curline = forline(forndx)
+205 textp   = forpos(forndx)
+206 GO SUB 318
+207 return
+208 REM  "print" [[#num "," ] expr { "," [#num ","] expr }] [","] {":" stmt} eol: expr can also be a literal string
+209 printnl = true
+210 IF tok$ = ":" OR tok$ = "" OR tok$ = "else" THEN GO TO 227
+211 printnl = true
+212 printwidth = 0
+213 IF tok$ <> "#" THEN GO TO 220
+214 num = 0: GO SUB 327
+215 if num <= 0 then print "("; curline; ") "; "Expecting a print width, found:"; tok$: errors = true: return
+216 printwidth = num
+217 GO SUB 327
+218 if tok$ <> "," then print "("; curline; ") "; "Print: Expecting a ',', found:"; tok$: errors = true: return
+219 GO SUB 327
+220 IF toktype$ = "string" THEN junk$ = MID$(tok$, 2, len(tok$) - 1): GO SUB 327: ELSE GO SUB 251: junk$ = STR$(retval)
+221 printwidth = printwidth - len(junk$)
+222 if printwidth <= 0 then print junk$; else print space$(printwidth); junk$;
+223 IF tok$ <> "," AND tok$ <> ";" THEN GO TO 227
+224 GO SUB 327
+225 printnl = false
+226 GO TO 210
+227 if printnl then print
+228 return
+229 REM  return from a subroutine
+230 curline = gstackln(gsp)
+231 textp   = gstacktp(gsp)
+232 gsp = gsp - 1
+233 GO SUB 318
+234 return
+235 REM  run statement
+236 GO SUB 117
+237 num = 1: GO SUB 315
+238 return
+239 REM  is it a valid line number?
+240 if num < 1 or num > maxlines then print "Line "; num; " out of range": errors = true
+241 return
+242 REM  paren expression: external entry point
+243 nsp = 0: retval = 0: prec = 0: n = 0: minprec = 0
+244 REM  paren expression: internal entry point
+245 if tok$ <> "(" then print "("; curline; ") "; "Paren Expr: Expecting '(', found:"; tok$: errors = true: return
+246 GO SUB 327
+247 prec = 0: GO SUB 253
+248 if tok$ <> ")" then print "("; curline; ") "; "Paren Expr: Expecting ')', found:"; tok$: errors = true: return
+249 GO SUB 327
+250 return
+251 REM  expression processing - external entry point
+252 nsp = 0: retval = 0: prec = 0: n = 0: minprec = 0
+253 REM  expression processing - internal entry point
+254 GO SUB 300
+255 n = 0: minprec = prec
+256 REM  handle numeric operands - numbers and unary operators
+257 IF tok$ = "-"   THEN GO SUB 327: prec = 7: GO SUB 253: n = -retval:    GO TO 271
+258 IF tok$ = "+"   THEN GO SUB 327: prec = 7: GO SUB 253: n =  retval:    GO TO 271
+259 IF tok$ = "not" THEN GO SUB 327: prec = 3: GO SUB 253: n = NOT retval: GO TO 271
+260 IF tok$ = "("   THEN GO SUB 244:                     n =  retval:    GO TO 271
+261 REM  built-in functions: rnd(e), abs(e), sgn(e), asc(var)
+262 IF tok$ = "abs" THEN GO SUB 327:  GO SUB 244: n = ABS(retval):    GO TO 271
+263 IF tok$ = "asc" THEN GO SUB 327:  GO SUB 290:     n = retval:         GO TO 271
+264 IF tok$ = "rnd" OR tok$ = "irnd" THEN GO SUB 327:  GO SUB 244: n = INT(RND * retval) + 1: GO TO 271
+265 IF tok$ = "sgn" THEN GO SUB 327:  GO SUB 244: n = SGN(retval):    GO TO 271
+266 REM  array: @(expr), variable, or number
+267 IF tok$ = "@" THEN GO SUB 327: GO SUB 244: n = atarry(retval):   GO TO 271
+268 IF toktype$ = "ident" THEN GO SUB 297: n = vars(n): GO SUB 327: GO TO 271
+269 IF toktype$ = "number" THEN n = num: GO SUB 327:                       GO TO 271
+270 PRINT "("; curline; ") "; "syntax error: expecting an operand, found: ", tok$: errors = true: GO TO 288
+271 REM  while binary operator and precedence of tok$ >= minprec
+272 IF errors THEN GO TO 288
+273 IF minprec <= 1 AND tok$ = "or"  THEN GO SUB 327: prec = 2: GO SUB 253: n = n OR retval:      GO TO 271
+274 IF minprec <= 2 AND tok$ = "and" THEN GO SUB 327: prec = 3: GO SUB 253: n = n AND retval:     GO TO 271
+275 IF minprec <= 4 AND tok$ = "="   THEN GO SUB 327: prec = 5: GO SUB 253: n = ABS(n =  retval): GO TO 271
+276 IF minprec <= 4 AND tok$ = "<"   THEN GO SUB 327: prec = 5: GO SUB 253: n = ABS(n <  retval): GO TO 271
+277 IF minprec <= 4 AND tok$ = ">"   THEN GO SUB 327: prec = 5: GO SUB 253: n = ABS(n >  retval): GO TO 271
+278 IF minprec <= 4 AND tok$ = "<>"  THEN GO SUB 327: prec = 5: GO SUB 253: n = ABS(n <> retval): GO TO 271
+279 IF minprec <= 4 AND tok$ = "<="  THEN GO SUB 327: prec = 5: GO SUB 253: n = ABS(n <= retval): GO TO 271
+280 IF minprec <= 4 AND tok$ = ">="  THEN GO SUB 327: prec = 5: GO SUB 253: n = ABS(n >= retval): GO TO 271
+281 IF minprec <= 5 AND tok$ = "+"   THEN GO SUB 327: prec = 6: GO SUB 253: n = n + retval:       GO TO 271
+282 IF minprec <= 5 AND tok$ = "-"   THEN GO SUB 327: prec = 6: GO SUB 253: n = n - retval:       GO TO 271
+283 IF minprec <= 6 AND tok$ = "*"   THEN GO SUB 327: prec = 7: GO SUB 253: n = n * retval:       GO TO 271
+284 IF minprec <= 6 AND tok$ = "/"   THEN GO SUB 327: prec = 7: GO SUB 253: n = n / retval:       GO TO 271
+285 IF minprec <= 6 AND tok$ = "\"   THEN GO SUB 327: prec = 7: GO SUB 253: n = n / retval:       GO TO 271
+286 IF minprec <= 6 AND tok$ = "mod" THEN GO SUB 327: prec = 7: GO SUB 253: n = n mod retval:     GO TO 271
+287 IF minprec <= 8 AND tok$ = "^"   THEN GO SUB 327: prec = 9: GO SUB 253: n = n ^ retval:       GO TO 271
+288 retval = n: GO SUB 305
+289 return
+290 REM  asc("x")
+291 if tok$ <> "(" then print "("; curline; ") "; "Asc: Expecting '(', found:"; tok$: errors = true: return
+292 GO SUB 327
+293 retval = code(MID$(tok$, 2, 1)): GO SUB 327
+294 if tok$ <> ")" then print "("; curline; ") "; "Asc: Expecting ')', found:"; tok$: errors = true: return
+295 GO SUB 327
+296 return
+297 REM  get index into vars store for variable
+298 if toktype$ = "ident" then n = code(left$(tok$, 1)) - code("a"): return
+299 print "("; curline; ") "; "Expecting a variable": errors = true: return
+300 REM  for expressions: save the current context
+301 nsp = nsp + 1
+302 nstack(nsp) = n
+303 pstack(nsp) = minprec
+304 return
+305 REM  for expressions: restore the current context
+306 n       = nstack(nsp)
+307 minprec = pstack(nsp)
+308 nsp = nsp - 1
+309 return
+310 REM  for gosub: save the line and column
+311 gsp = gsp + 1
+312 gstackln(gsp) = curline
+313 gstacktp(gsp) = textp
+314 return
+315 REM  lexical analyzer
+316 curline = num
+317 textp = 1
+318 REM  called with preset line and column
+319 thelin$ = pgm$(curline)
+320 thech$ = " "
+321 GO SUB 327
+322 return
+323 REM  skip to the end of the line
+324 IF thech$ <> "" THEN GO SUB 366: GO TO 323
+325 tok$ = "": toktype$ = ""
+326 return
+327 REM  get the next token
+328 tok$ = "": toktype$ = ""
+329 if thech$ = "" then return
+330 IF thech$ <= " " THEN GO SUB 366: GO TO 327
+331 tok$ = thech$
+332 IF (thech$ >= "a" AND thech$ <= "z") OR (thech$ >= "A" AND thech$ <= "Z") THEN GO SUB 360: RETURn
+333 IF thech$ >= "0" AND thech$ <= "9" THEN GO SUB 354: RETURn
+334 IF thech$ = CHR$(34) THEN GO SUB 347: RETURn
+335 IF thech$ = CHR$(39) THEN GO SUB 323: RETURn
+336 toktype$ = "punct"
+337 tok$ = thech$ + mid$(thelin$, textp, 1)
+338 IF tok$ = ">=" THEN GO SUB 366: GO SUB 366: RETURn
+339 IF tok$ = "<=" THEN GO SUB 366: GO SUB 366: RETURn
+340 IF tok$ = "<>" THEN GO SUB 366: GO SUB 366: RETURn
+341 tok$ = thech$
+342 IF pos(thech$, "#()*+,-/:;<=>?@\^") > 0 THEN GO SUB 366: RETURn
+343 toktype$ = "": print "("; curline; ") "; "What->"; thech$: errors = true:
+344 return
+345 REM  leave the " as the beginning of the string, so it won't get confused with other tokens
+346 REM  especially in the print routines
+347 REM  read a string
+348 toktype$ = "string"
+349 GO SUB 366
+350 IF thech$ = CHR$(34) THEN GO SUB 366: RETURn
+351 if thech$ = "" then print "("; curline; ") "; "String not terminated": errors = true: return
+352 tok$ = tok$ + thech$
+353 GO TO 349
+354 REM  read a number
+355 toktype$ = "number"
+356 GO SUB 366
+357 if thech$ < "0" or thech$ > "9" then num = val(tok$): return
+358 tok$ = tok$ + thech$
+359 GO TO 356
+360 REM  read an identifier
+361 tok$ = "": toktype$ = "ident"
+362 if thech$ >= "A" and thech$ <= "Z" then thech$ = chr$(code(thech$) + 32)
+363 IF thech$ >= "a" AND thech$ <= "z" THEN tok$ = tok$ + thech$: GO SUB 366: GO TO 362
+364 IF tok$ = "rem" THEN GO SUB 323
+365 return
+366 REM  get the next char from the current line
+367 if textp > len(thelin$) then thech$ = "": return
+368 thech$ = mid$(thelin$, textp, 1)
+369 textp = textp + 1
+370 return
